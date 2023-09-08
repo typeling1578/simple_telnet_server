@@ -18,7 +18,7 @@ async function executeRateLimiter(socket, point = 1) {
     }
 }
 
-const server = net.createServer(async socket => {
+const server = net.createServer(socket => {
     const clientInfo = `${socket.remoteAddress}:${socket.remotePort}`;
 
     console.log(`connected, client = ${clientInfo}`);
@@ -31,18 +31,26 @@ const server = net.createServer(async socket => {
         console.error(e);
     });
 
-    await executeRateLimiter(socket, 100);
+    (async () => {
+        await executeRateLimiter(socket, 100);
 
-    socket.on("data", async data => {
-        await executeRateLimiter(socket, data.length);
-        console.log(`'${data}', client = ${clientInfo}`);
-    });
+        socket.on("data", async data => {
+            await executeRateLimiter(socket, data.length);
+            console.log(`'${data}', client = ${clientInfo}`);
+        });
 
-    const message = fs.readFileSync("./message.txt").toString();
-    for (let char of message.split("")) {
-        if (!socket.write(char)) break;
-        await new Promise(resolve => setTimeout(resolve, char == " " ? 10 : 30));
-    }
+        const message = fs.readFileSync("./message.txt").toString();
+        for (let char of message.split("")) {
+            if (!socket.writable) break;
+            await new Promise(resolve => socket.write(char, "utf-8", e => {
+                if (e) {
+                    console.error(e);
+                }
+                resolve();
+            }));
+            await new Promise(resolve => setTimeout(resolve, char == " " ? 10 : 30));
+        }
+    })();
 }).listen(23);
 
 console.log('listening on port 23');
