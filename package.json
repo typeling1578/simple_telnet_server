@@ -1,0 +1,14 @@
+{
+  "name": "simple_telnet_server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "author": "typeling1578",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "rate-limiter-flexible": "^3.0.0"
+  }
+}
