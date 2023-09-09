@@ -1,6 +1,8 @@
 import net from "net";
 import fs from "fs";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import { resolve } from "path";
+import { count } from "console";
 
 const rateLimiter = new RateLimiterMemory({
     points: 1000,
@@ -18,13 +20,27 @@ async function executeRateLimiter(socket, point = 1) {
     }
 }
 
+function showConnections(server) {
+    return new Promise(resolve => {
+        server.getConnections((err, count) => {
+            if (count) {
+                console.log(`connections: ${count}/${server.maxConnections}`);
+            }
+            resolve();
+        });
+    });
+}
+
 const server = net.createServer(socket => {
+    showConnections(server);
+
     const clientInfo = `${socket.remoteAddress}:${socket.remotePort}`;
 
-    console.log(`connected (${server.connections}/${server.maxConnections}), client = ${clientInfo}`);
+    console.log(`connected, client = ${clientInfo}`);
 
     socket.on("close", () => {
-        console.log(`closed (${server.connections}/${server.maxConnections}), client = ${clientInfo}`);
+        showConnections(server);
+        console.log(`closed, client = ${clientInfo}`);
     });
 
     socket.on("error", e => {
