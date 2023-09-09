@@ -1,8 +1,6 @@
 import net from "net";
 import fs from "fs";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import { resolve } from "path";
-import { count } from "console";
 
 const rateLimiter = new RateLimiterMemory({
     points: 1000,
