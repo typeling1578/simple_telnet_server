@@ -21,10 +21,10 @@ async function executeRateLimiter(socket, point = 1) {
 const server = net.createServer(socket => {
     const clientInfo = `${socket.remoteAddress}:${socket.remotePort}`;
 
-    console.log(`connected, client = ${clientInfo}`);
+    console.log(`connected (${server.connections}/${server.maxConnections}), client = ${clientInfo}`);
 
     socket.on("close", () => {
-        console.log(`closed, client = ${clientInfo}`);
+        console.log(`closed (${server.connections}/${server.maxConnections}), client = ${clientInfo}`);
     });
 
     socket.on("error", e => {
@@ -51,6 +51,8 @@ const server = net.createServer(socket => {
             await new Promise(resolve => setTimeout(resolve, char == " " ? 10 : 30));
         }
     })();
-}).listen(23);
+});
+server.maxConnections = 100;
+server.listen(23);
 
 console.log("listening on port 23");
